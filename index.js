@@ -476,7 +476,6 @@ app.get('/create-unlimitmail', async (req, res) => {
                 }
             }
         );
-        console.log(createResponse.data);
 
         if (createResponse.data.data != - null) {
             return res.json({
