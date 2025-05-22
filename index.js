@@ -448,6 +448,84 @@ app.get('/read-hotmail', async (req, res) => {
     }
 });
 
+// create email unlimitmail
+app.get('/create-unlimitmail', async (req, res) => {
+    const token = req.query.token;
+    console.log(token);
+
+    try {
+        const response = await axios.get(
+            'https://unlimitmail.com/api/getAllDomain',
+        );
+
+
+        const index_Domain_Object = Math.floor(Math.random() * response.data.data.length) || 0;
+        const randomNumber = Math.floor(Math.random() * 100000000);
+        const email = `${randomString(10)}${randomNumber}@${response.data.data[index_Domain_Object].domain}`;
+        const password = randomString(8);
+        const createResponse = await axios.post(
+            'https://unlimitmail.com/api/createEmail',
+            {
+                email: email,
+                password: password,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        console.log(createResponse.data);
+
+        if (createResponse.data.data != - null) {
+            return res.json({
+                email: createResponse.data.data
+            })
+        }
+    } catch (error) {
+        console.error("Lỗi khi gọi API hoặc xử lý dữ liệu - unlimitmail");
+        return res.json({ code: "111111" });
+    }
+});
+
+// get code mail unlimitmail
+app.get('/get-unlimitmail-code', async (req, res) => {
+    const { email, token } = req.query;
+    console.log(`Nhận yêu cầu get code từ email: ${email}`);
+
+    if (!email || !token) {
+        return res.json({ error: "Thiếu email hoặc token" });
+    }
+
+    try {
+        const response = await axios.post(
+            'https://unlimitmail.com/api/v1/email/getEmailContentByEmail',
+            {
+                email: email,
+                token: token,
+            },
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+        console.log(response.data);
+
+
+        const emailText = response.data?.data?.[0]?.content || "";
+        const code = extractVerificationCode(emailText);
+
+        if (code) {
+            return res.json({ code: code });
+        }
+
+        return res.json({ code: "111111" });
+    } catch (error) {
+        console.error("Lỗi khi gọi API hoặc xử lý dữ liệu - unlimitmail");
+        return res.json({ code: "111111" });
+    }
+});
+
 // Khởi động server
 app.listen(PORT, () => {
     console.log(`Server chạy tại http://localhost:${PORT}`);
