@@ -525,6 +525,30 @@ app.get('/get-unlimitmail-code', async (req, res) => {
     }
 });
 
+
+// read hotmail - api-dongvan
+app.get('/get-code-api-dongvan', async (req, res) => {
+    const { email, rft, password, client_id } = req.query;
+
+    try {
+        const res__1 = await axios.post('https://tools.dongvanfb.net/api/graph_code', {
+            email: email,
+            pass: password,
+            client_id: client_id,
+            refresh_token: rft,
+            type: ""
+        },
+            {
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+        return res.json({ code: res__1?.code ? res__1?.code : "111111" })
+    } catch (error) {
+        console.error("Lỗi khi gọi API hoặc xử lý dữ liệu - dongvan api");
+        return res.json({ code: "111111" })
+    }
+})
+
 // Khởi động server
 app.listen(PORT, () => {
     console.log(`Server chạy tại http://localhost:${PORT}`);
